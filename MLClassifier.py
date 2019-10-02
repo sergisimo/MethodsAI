@@ -4,50 +4,56 @@ from sklearn.model_selection import train_test_split
 
 import numpy as np
 
-def createDataSets():
-    utterancesFile = open("utterances.txt", "r")
-    utterancesData = {}
-    for line in utterancesFile:
-        line = line.split(" ", 1)
-        if line[0] not in utterancesData:
-            utterancesData[line[0]] = []
-        utterancesData[line[0]].append(line[1].strip())
+class MLClassifier:
 
-    trainingData = {}
-    testData = {}
-    for dialogType in utterancesData:
-        splitted = np.split(utterancesData[dialogType], [int(len(utterancesData[dialogType]) * 0.85)])
-        trainingData[dialogType] = splitted[0].tolist()
-        testData[dialogType] = splitted[1].tolist()
+    vocabulary = []
+    classifier = None
 
-    utterancesFile.close()
+    # Function that extracts the data for training the classifier
+    def createDataSetsForML(self):
 
-    return trainingData, testData
+        utterancesFile = open("utterances.txt", "r")
 
-def tokenizeData(trainingData, testData):
+        X = []
+        Y = []
+        for line in utterancesFile:
+            line = line.split(" ", 1)
+            X.append(line[1].strip())
+            Y.append(line[0])
 
-    X = []
-    Y = []
-    vectorizer = CountVectorizer()
+        return X, Y
 
-    for dialogType in trainingData:
-        for sentence in trainingData[dialogType]:
-            X.append(sentence)
-            Y.append(dialogType)
+    # Function that vectorizes a sentence according to the bag of words.
+    def predictSentence(self, sentence):
 
-    for dialogType in testData:
-        for sentence in testData[dialogType]:
-            X.append(sentence)
-            Y.append(dialogType)
+        iterable = []
+        iterable.append(sentence)
 
-    X = vectorizer.fit_transform(X)
+        vectorizer = CountVectorizer(vocabulary=self.vocabulary)
+        vector = vectorizer.fit_transform(iterable)
+        self.vocabulary = vectorizer.vocabulary_
 
-    return X.toarray(), Y,
+        categories = self.classifier.predict(vector.toarray().reshape(1, -1))
 
-trainingData, testData = createDataSets()
-X, Y = tokenizeData(trainingData, testData)
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.15)
+        return categories[0]
 
-clf = DecisionTreeClassifier(random_state=0)
-clf = clf.fit(X_train, Y_train)
-print("Decision Tree Classifier -> Accuracy: ", clf.score(X_test, Y_test) * 100 , "%")
+    # Function for transforming the sentences in a bag of words.
+    def tokenizeData(self, X):
+
+        vectorizer = CountVectorizer()
+        X = vectorizer.fit_transform(X)
+        self.vocabulary = vectorizer.vocabulary_
+
+        return X.toarray()
+
+    # Function that trains the classifier.
+    def train(self):
+        # Create data and vectorize it.
+        X, Y = self.createDataSetsForML()
+        X = self.tokenizeData(X)
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.15)
+
+        # Creates the Decision tree classifier, trains it and tests it.
+        self.classifier = DecisionTreeClassifier(random_state=0)
+        self.classifier.fit(X_train, Y_train)
+        print("Accuracy: ", self.classifier.score(X_test, Y_test) * 100 , "%")
