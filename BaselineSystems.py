@@ -2,6 +2,7 @@ import numpy as np
 import os
 import random
 
+# This function extracts all the data for training and divides it into train and test sets.
 def createDataSets():
     utterancesFile = open("utterances.txt", "r")
     utterancesData = {}
@@ -22,6 +23,7 @@ def createDataSets():
 
     return trainingData, testData
 
+# This function implements a rule based classifier using keyword maching.
 def ruleBasedClassifier(sentence):
 
     keywords = {"affirm":["yes", "yeah", "yea"],
@@ -54,6 +56,7 @@ def ruleBasedClassifier(sentence):
 
     return None
 
+# This function tests the rule based classifier with the test data.
 def testRuleBasedClassifier(testData):
 
     total = 0
@@ -68,6 +71,7 @@ def testRuleBasedClassifier(testData):
     proportion = (amountRight / total) * 100
     print("Rule Based -> Accuracy = ", proportion, "%")
 
+# This function allows the user to test the rule based classifier.
 def manualRuleBasedClassifier():
 
     while True:
@@ -78,6 +82,7 @@ def manualRuleBasedClassifier():
             break
         print("The category of your sentence is: ", ruleBasedClassifier(sentence.lower()))
 
+# This function calculates the proportion of each category in the training data.
 def calculateProportions(trainingData):
 
     total = 0
@@ -91,10 +96,11 @@ def calculateProportions(trainingData):
 
     return proportions
 
-
+# This function implements the proportional based classifier using the proportions calculated above.
 def proportionalBasedClassifier(proportions):
     return random.choices(list(proportions.keys()), list(proportions.values()))
 
+# This function tests the proprotion based classifier with the test data.
 def testProportionalBasedClassifier(testData, proportions):
 
     total = 0
@@ -109,6 +115,7 @@ def testProportionalBasedClassifier(testData, proportions):
     proportion = (amountRight / total) * 100
     print("Proportion Based -> Accuracy = ", proportion, "%")
 
+# This function allows the user to test the proportion based classifier.
 def manualProportionalBasedClassifier(proportions):
 
     while True:
@@ -118,10 +125,3 @@ def manualProportionalBasedClassifier(proportions):
         if (sentence == 'exit'):
             break
         print("The category of your sentence is: ", proportionalBasedClassifier(proportions)[0])
-
-trainingData, testData = createDataSets()
-testRuleBasedClassifier(testData)
-manualRuleBasedClassifier()
-proportions = calculateProportions(trainingData)
-testProportionalBasedClassifier(testData, proportions)
-manualProportionalBasedClassifier(proportions)

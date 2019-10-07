@@ -1,0 +1,10 @@
+{
+  "levenshteinDistance": 2,
+  "inputLowerCase": true,
+  "machingLearningClassifier": true,
+  "outputCaps": false,
+  "checkLevenshtein": false,
+  "allowRestart": true,
+  "utterancesLimit": 0,
+  "utterancesLimitRestart": false
+}

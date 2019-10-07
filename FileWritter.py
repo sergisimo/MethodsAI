@@ -2,6 +2,7 @@ import os
 import json
 import glob
 
+# This function prints the conversation on the terminal.
 def printConvo(userData, systemData):
     print("session id:", userData["session-id"])
 
@@ -13,6 +14,7 @@ def printConvo(userData, systemData):
         print("user:", userData["turns"][temp]["transcription"])
         temp += 1
 
+# This function writes data into the conversation and the utterances file.
 def writeFiles(userData, systemData, conversationsFile, utterancesFile):
 
     conversationsFile.write("session id: %s\n" % userData["session-id"])
@@ -32,6 +34,7 @@ def writeFiles(userData, systemData, conversationsFile, utterancesFile):
 
     conversationsFile.write("\n\n")
 
+# This function reads all the data and processes it.
 def writeFile(waiting):
     if waiting is False:
         conversationsFile = open("convo.txt", "w+")
