@@ -1,6 +1,7 @@
 from MLClassifier import MLClassifier
 from Restaurant import Restaurant
 from BaselineSystems import ruleBasedClassifier
+import speech_recognition as sr
 import json
 
 class ChatBot:
@@ -36,6 +37,7 @@ class ChatBot:
     sentences = BotSentences()
     categories = ActCategories()
     utteranceCounter = 0
+    errorCounter = 0
     restaurantDB = None
     config = None
     state = None
@@ -61,6 +63,7 @@ class ChatBot:
             self.searchRestaurant(sentence)
             self.state = self.informState
         else:
+            self.errorCounter += 1
             self.output(self.sentences.uknown)
 
     # This function implements the inform state.
@@ -71,6 +74,7 @@ class ChatBot:
         if actCategory == self.categories.reqmore:
             self.printRestaurant(False)
         else:
+            self.errorCounter += 1
             self.output(self.sentences.uknown)
 
     # This function searches a restaurant depending on the preferences.
@@ -100,6 +104,7 @@ class ChatBot:
                 self.restaurantDB.extractPreferences(sentence)
                 break
             else:
+                self.errorCounter += 1
                 self.output(self.sentences.morePreferencesUknown)
 
         return False
@@ -124,6 +129,7 @@ class ChatBot:
             self.state = self.initialState
             self.restaurantDB.cleanPreferenceProfile()
             self.utteranceCounter = 0
+            self.errorCounter = 0
             return False
 
         self.output(self.sentences.restartNotAllowed)
@@ -138,7 +144,7 @@ class ChatBot:
 
     # This function gets the input of the user and predicts its category.
     def predictInput(self):
-         sentence = input()
+         sentence = self.userInput()
          self.utteranceCounter += 1
          if (self.config["inputLowerCase"]):
              sentence = sentence.lower()
@@ -147,6 +153,28 @@ class ChatBot:
              return sentence, self.classifier.predictSentence(sentence)
 
          return sentence, ruleBasedClassifier(sentence)
+
+    def userInput(self):
+
+        if (self.config["speechRecognition"]):
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                print("Recording...")
+                audio = r.listen(source)
+                print("Recorded!")
+
+            try:
+                sentence = r.recognize_google(audio)
+                print ("User speech -> ", sentence)
+                return sentence
+            except sr.UnknownValueError:
+                print("Google Speech Recognition could not understand audio")
+                return ""
+            except sr.RequestError as e:
+                print("Could not request results from Google Speech Recognition service; {0}".format(e))
+                return ""
+
+        return input()
 
     # This function controls the amount of utterances.
     def checkLimit(self):
@@ -184,6 +212,8 @@ class ChatBot:
 
             if (self.checkLimit()):
                 break
+
+        print("The error rate is:", (self.errorCounter / self.utteranceCounter) * 100, "%")
 
 bot = ChatBot()
 bot.startConversation()

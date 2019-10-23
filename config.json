@@ -3,8 +3,9 @@
   "inputLowerCase": true,
   "machingLearningClassifier": true,
   "outputCaps": false,
-  "checkLevenshtein": false,
+  "checkLevenshtein": true,
   "allowRestart": true,
   "utterancesLimit": 0,
-  "utterancesLimitRestart": false
+  "utterancesLimitRestart": false,
+  "speechRecognition": true
 }
